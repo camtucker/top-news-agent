@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -m py_compile top_news_agent.py)",
+      "Bash(code -r /Users/cam/dev/learning/agents/top-news-agent)",
+      "Bash(mkdir -p .github/workflows)",
+      "Bash(mv top-news-agent.yml .github/workflows/top-news-agent.yml)",
+      "Bash(gh auth *)",
+      "Bash(git config *)"
+    ]
+  }
+}

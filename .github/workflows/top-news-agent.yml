@@ -1,0 +1,54 @@
+name: Top News Agent
+
+on:
+  schedule:
+    - cron: "0 13 * * *"   # 13:00 UTC = 9am ET, daily
+  workflow_dispatch: {}     # lets you trigger it manually from the Actions tab
+
+permissions:
+  contents: write
+  models: read
+
+jobs:
+  run-agent:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install openai
+
+      - name: Run Top News Agent
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python top_news_agent.py
+
+      - name: Get date
+        id: date
+        run: echo "today=$(date -u +%F)" >> "$GITHUB_OUTPUT"
+
+      - name: Commit digest
+        run: |
+          git config user.name "top-news-agent"
+          git config user.email "agent@users.noreply.github.com"
+          git add digests/
+          git diff --cached --quiet || git commit -m "Top news digest ${{ steps.date.outputs.today }}"
+          git push
+
+      - name: Email digest
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_APP_PASSWORD }}
+          subject: "Top News Digest - ${{ steps.date.outputs.today }}"
+          from: Top News Agent
+          to: ${{ secrets.MAIL_USERNAME }}
+          html_body: file://digests/latest.md
+          convert_markdown: true
