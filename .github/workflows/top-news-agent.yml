@@ -48,7 +48,7 @@ jobs:
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_APP_PASSWORD }}
           subject: "Top News Digest - ${{ steps.date.outputs.today }}"
-          from: Top News Agent
+          from: Top News Agent <${{ secrets.MAIL_USERNAME }}>
           to: ${{ secrets.MAIL_USERNAME }}
           html_body: file://digests/latest.md
           convert_markdown: true
